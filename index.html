@@ -112,7 +112,6 @@
         <button class="btn btn-add" id="toggleFormBtn">+ Добавить</button>
     </div>
 
-    <!-- Форма для новой марки -->
     <div id="formPopup" class="form-popup">
         <div class="form-group">
             <label>Марка металла</label>
@@ -146,8 +145,7 @@
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <!-- Данные загружаются скриптом -->
-            </tbody>
+                </tbody>
         </table>
     </div>
     
@@ -155,9 +153,7 @@
 </div>
 
 <script>
-    // База данных с добавленным полем note (примечание)
-    const defaultData = [
-        // База данных с добавленным полем note (примечание)
+    // База данных
     const defaultData = [
         { mark: "08Х18Н6АГ10С", temp: "⌀ 150 — 1160 °C", hold: "10 мин.", note: "" },
         { mark: "10Х18Н9", temp: "⌀ 65 — 1160 °C", hold: "—", note: "" },
@@ -302,7 +298,7 @@
         let visibleCount = 0;
 
         rows.forEach(row => {
-            const cells = Array.from(row.querySelectorAll('td')).slice(1, 5); // Поиск по марке, температуре, выдержке и примечанию
+            const cells = Array.from(row.querySelectorAll('td')).slice(1, 5);
             const text = cells.map(c => c.textContent.toLowerCase()).join(' ');
             
             if (text.includes(query)) {
