@@ -104,8 +104,8 @@
 <body>
 
 <div class="container">
-    <h1>Режимы ковки металлов (Редактируемая)</h1>
-    <div class="hint">ℹ️ Для изменения значения нажмите на любой текст в таблице. Нумерация строк обновляется автоматически.</div>
+    <h1>Режимы ковки металлов (Обновленная база)</h1>
+    <div class="hint">ℹ️ Нажмите на любой text в таблице, чтобы отредактировать. Нумерация пересчитается сама.</div>
     
     <div class="controls">
         <input type="text" id="searchInput" class="search-box" placeholder="Поиск марки, диаметра или примечания..." autocomplete="off">
@@ -115,15 +115,15 @@
     <div id="formPopup" class="form-popup">
         <div class="form-group">
             <label>Марка металла</label>
-            <input type="text" id="newMark" placeholder="Например: ЭП33">
+            <input type="text" id="newMark" placeholder="Например: ПТ3В">
         </div>
         <div class="form-group">
             <label>Размеры (⌀) и температура ковки</label>
-            <input type="text" id="newTemp" placeholder="Например: ⌀ 70 — 1150 °C">
+            <input type="text" id="newTemp" placeholder="Например: ⌀ 155 — ⌀ 120">
         </div>
         <div class="form-group">
             <label>Выдержка</label>
-            <input type="text" id="newHold" placeholder="Например: 15 мин. или —">
+            <input type="text" id="newHold" placeholder="Например: 15 мин.">
         </div>
         <div class="form-group">
             <label>Примечание</label>
@@ -137,15 +137,15 @@
             <thead>
                 <tr>
                     <th style="width: 5%">№</th>
-                    <th style="width: 20%">Марка</th>
-                    <th style="width: 40%">Размеры и температура</th>
+                    <th style="width: 22%">Марка</th>
+                    <th style="width: 38%">Размеры и температура</th>
                     <th style="width: 12%">Выдержка</th>
                     <th style="width: 15%">Примечание</th>
                     <th style="width: 8%">Действие</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                </tbody>
+            </tbody>
         </table>
     </div>
     
@@ -153,44 +153,56 @@
 </div>
 
 <script>
-    // База данных
+    // База данных с очищенными примечаниями (оставлено только "на 2 конца" там, где необходимо)
     const defaultData = [
+        { mark: "08Х14Н5М2О (ЭИ712)", temp: "⌀ 90 — ⌀ 70ок (t=1160 °C)", hold: "выд. 20 мин.", note: "на 2 конца" },
         { mark: "08Х18Н6АГ10С", temp: "⌀ 150 — 1160 °C", hold: "10 мин.", note: "" },
+        { mark: "10Х17Н13М2Т", temp: "⌀ 100 — ⌀ 73(52) (t=1160 °C)", hold: "—", note: "" },
         { mark: "10Х18Н9", temp: "⌀ 65 — 1160 °C", hold: "—", note: "" },
         { mark: "12Х13", temp: "⌀ 65 — 1150 °C", hold: "—", note: "" },
         { mark: "29НК", temp: "⌀ 130 — 1160 °C", hold: "40 мин.", note: "" },
         { mark: "32НКД", temp: "⌀ 130 — 1160 °C", hold: "40 мин.", note: "" },
         { mark: "36Н", temp: "⌀ 65 — 1150 °C", hold: "—", note: "" },
+        { mark: "37Х12Н8Г8МФ (ЭИ481)", temp: "⌀ 155 — ⌀ 120 — ⌀ 90 (t=1200 °C)", hold: "выд. 15 мин.", note: "" },
         { mark: "38Х2МЮА", temp: "⌀ 50 — 1170 °C", hold: "25 мин.", note: "" },
         { mark: "40Х", temp: "⌀ 70, 60, 32 — 1150 °C", hold: "—", note: "" },
         { mark: "40ХН2МА", temp: "⌀ 70 — 1180 °C", hold: "15–20 мин.", note: "" },
-        { mark: "47НД", temp: "⌀ 80 — 1150 °C", hold: "—", note: "" },
-        { mark: "49КФ", temp: "⌀ 65 — 1150 °C", hold: "—", note: "" },
-        { mark: "50Н", temp: "⌀ 65 — 1150 °C", hold: "—", note: "" },
+        { mark: "47НД", temp: "⌀ 80 — 1150 °C / ⌀ 140 — ⌀ 100(20) (t=1150 °C)", hold: "выд. 20 мин.", note: "" },
+        { mark: "49КФ", temp: "⌀ 65 — 1150 °C / ⌀ 110 — ⌀ 65(31) (t=1150 °C)", hold: "—", note: "" },
+        { mark: "50Н", temp: "⌀ 110 — ⌀ 70(40) ; ⌀ 110 — ⌀ 80(52) ; ⌀ 150 — ⌀ 110(40/52) (t=1150 °C)", hold: "выд. 10 мин (⌀150)", note: "" },
+        { mark: "БрОФ7-0.2 (Бронза)", temp: "⌀ 100 — ⌀ 80 ; ⌀ 100 — ⌀ 90 ; ⌀ 88 — ⌀ 70 (t=400 °C)", hold: "—", note: "" },
+        { mark: "ВТ1-0", temp: "⌀ 60 — ⌀ 30(12)", hold: "40 мин.", note: "" },
+        { mark: "ВТ3", temp: "⌀ 100 — ⌀ 70ок ; ⌀ 115 — ⌀ 87ок", hold: "—", note: "" },
+        { mark: "ВТ3-1", temp: "⌀ 60...65 — нет данных", hold: "—", note: "на 2 конца" },
+        { mark: "ВТ5 / ВТ5-1", temp: "⌀ 140, 65 — нет данных", hold: "—", note: "" },
+        { mark: "ВТ6", temp: "⌀ 120 — ⌀ 95 — ⌀ 65(35,20) ; ⌀ 170 ➔ 150 ➔ 120 ➔ 95/100ок", hold: "—", note: "на 2 конца" },
+        { mark: "ВТ6 (Модуль-Т)", temp: "⌀ 115 — ⌀ 90 — ⌀ 62 (t=1000 °C)", hold: "—", note: "" },
+        { mark: "ВТ20", temp: "⌀ 50 — нет данных", hold: "—", note: "на 2 конца" },
         { mark: "МН19ВП", temp: "⌀ 140 — 900 °C", hold: "10 мин.", note: "" },
         { mark: "МНК", temp: "⌀ 75 — 800 °C", hold: "—", note: "" },
         { mark: "НМЖМц28-2.5-1.5", temp: "⌀ 65 — 1020 °C", hold: "—", note: "" },
         { mark: "НММц38-2В", temp: "⌀ 140, 70, 65 — 1020 °C", hold: "10 мин.", note: "" },
-        { mark: "ХН35ВТ", temp: "⌀ 160, 100, 70, 65 — 1160 °C", hold: "15 мин (160)", note: "на 2 конца (⌀160)" },
+        { mark: "НП2Э", temp: "⌀ 150 — ⌀ 105(75) (t=1100 °C)", hold: "выд. 10 мин.", note: "" },
+        { mark: "ОТ4", temp: "⌀ 135 — нет данных", hold: "—", note: "" },
+        { mark: "ПТ3В", temp: "⌀ 155 — ⌀ 120 — ⌀ 95(65)", hold: "—", note: "" },
+        { mark: "ХН32Т (УР.ПР)", temp: "⌀ 65 — ⌀ 30&plusmn;1ок (t=1160 °C)", hold: "—", note: "на 2 конца" },
+        { mark: "ХН35ВТ (УР.ПР)", temp: "⌀ 65 — ⌀ 32(30) (t=1160 °C)", hold: "—", note: "на 2 конца" },
         { mark: "ХН45Ю", temp: "⌀ 65 — нет данных", hold: "—", note: "" },
+        { mark: "ХН50ВМТЮБ", temp: "⌀ 110 — ⌀ 20(34) ; ⌀ 110 — ⌀ 70(37) (t=1200 °C)", hold: "—", note: "на 2 конца" },
         { mark: "ХН60ВТ", temp: "⌀ 140, 70 — 1180 °C", hold: "—", note: "" },
+        { mark: "ХН70ВМТЮ", temp: "⌀ 120 — ⌀ 90 — ⌀ 65(33) (t=1170 °C)", hold: "—", note: "на 2 конца" },
         { mark: "ХН70Ю", temp: "⌀ 50 — нет данных", hold: "—", note: "" },
-        { mark: "ХН77ТЮР", temp: "⌀ 145, 80 — 1180 °C", hold: "15 мин (145)", note: "" },
+        { mark: "ХН77ТЮР", temp: "⌀ 145, 80 — 1180 °C", hold: "15 мин (145)", note: "на 2 конца" },
         { mark: "ХН78Т", temp: "⌀ 70 — нет данных", hold: "—", note: "" },
+        { mark: "ЧИНХТЮ", temp: "⌀ 90 — ⌀ 65(25) (t=1160 °C)", hold: "—", note: "на 2 конца" },
         { mark: "ЭИ69", temp: "⌀ 50 — 1150 °C", hold: "—", note: "" },
-        { mark: "ЭИ696", temp: "⌀ 160 (1080 °C); ⌀ 150, 75, 65 (1100 °C); ⌀ 75 (1120 °C); ⌀ 50 (1150 °C)", hold: "15 мин (160)", note: "" },
-        { mark: "ЭИ943", temp: "⌀ 70 — 1160 °C", hold: "—", note: "" },
+        { mark: "ЭИ696", temp: "⌀ 110 — ⌀ 65(36) (t=1120 °C)", hold: "—", note: "" },
+        { mark: "ЭИ943", temp: "⌀ 110 — ⌀ 80 (t=1160 °C)", hold: "—", note: "на 2 конца" },
         { mark: "ЭП33", temp: "⌀ 70, 40 (1150 °C); ⌀ 60, 50 (1120 °C); ⌀ 65 (1100 °C)", hold: "—", note: "" },
         { mark: "ЭП164", temp: "⌀ 160 (1160 °C); ⌀ 75, 70 (1150 °C)", hold: "15 мин (160)", note: "" },
-        { mark: "ЭП184", temp: "⌀ 160 — 1160 °C", hold: "15 мин.", note: "" },
+        { mark: "ЭП184", temp: "⌀ 160 — 1160 °C", hold: "15 мин.", note: "на 2 конца" },
         { mark: "ЭП637", temp: "⌀ 70, 52...45 — 1150 °C", hold: "—", note: "" },
-        { mark: "ЭП678", temp: "⌀ 50 (1150 °C); ⌀ 70", hold: "—", note: "" },
-        { mark: "ВТ1-0", temp: "⌀ 70, 65, 60 — нет данных", hold: "—", note: "" },
-        { mark: "ВТ3-1", temp: "⌀ 60...65 — нет данных", hold: "—", note: "на 2 конца (⌀60...65)" },
-        { mark: "ВТ5 / ВТ5-1", temp: "⌀ 140, 65 — нет данных", hold: "—", note: "" },
-        { mark: "ВТ6", temp: "⌀ 140, 100, 80, 75 — нет данных", hold: "—", note: "на 2 конца (⌀140)" },
-        { mark: "ВТ20", temp: "⌀ 50 — нет данных", hold: "—", note: "на 2 конца (⌀50)" },
-        { mark: "ОТ4", temp: "⌀ 135 — нет данных", hold: "—", note: "" }
+        { mark: "ЭП678", temp: "⌀ 50 (1150 °C); ⌀ 70", hold: "—", note: "" }
     ];
 
     let currentData = JSON.parse(localStorage.getItem('forgeDatabase')) || defaultData;
@@ -202,11 +214,8 @@
     const saveEntryBtn = document.getElementById('saveEntryBtn');
     const noResults = document.getElementById('noResults');
 
-    // Отрисовка таблицы
     function renderTable() {
         tableBody.innerHTML = '';
-        
-        // Сортировка по алфавиту марок
         currentData.sort((a, b) => a.mark.localeCompare(b.mark));
 
         currentData.forEach((item, index) => {
@@ -224,7 +233,6 @@
         saveToStorage();
     }
 
-    // Сохранение отредактированного поля
     window.updateField = function(index, field, element) {
         let value = element.textContent.trim();
         if (field === 'mark' && !value) {
@@ -240,7 +248,6 @@
         localStorage.setItem('forgeDatabase', JSON.stringify(currentData));
     }
 
-    // Удаление строки
     window.deleteEntry = function(index) {
         if(confirm(`Удалить марку ${currentData[index].mark}?`)) {
             currentData.splice(index, 1);
@@ -249,7 +256,6 @@
         }
     };
 
-    // Открытие/закрытие формы добавления
     toggleFormBtn.addEventListener('click', () => {
         if (formPopup.style.display === 'block') {
             formPopup.style.display = 'none';
@@ -260,7 +266,6 @@
         }
     });
 
-    // Добавление новой строки
     saveEntryBtn.addEventListener('click', () => {
         const markInput = document.getElementById('newMark').value.trim();
         const tempInput = document.getElementById('newTemp').value.trim();
@@ -268,7 +273,7 @@
         const noteInput = document.getElementById('newNote').value.trim();
 
         if (!markInput || !tempInput) {
-            alert('Пожалуйста, укажите Марку и Размеры с температурой!');
+            alert('Пожалуйста, укажите Марку и Размеры!');
             return;
         }
 
@@ -291,7 +296,6 @@
         filterTable();
     });
 
-    // Поиск по таблице
     function filterTable() {
         const query = searchInput.value.toLowerCase().trim();
         const rows = tableBody.querySelectorAll('tr');
@@ -320,8 +324,6 @@
     }
 
     searchInput.addEventListener('input', filterTable);
-
-    // Запуск приложения
     renderTable();
 </script>
 
